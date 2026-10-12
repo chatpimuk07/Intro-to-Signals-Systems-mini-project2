@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+*/.DS_Store
+*/*/.DS_Store
+/untitled.m
+task2_capture_*.png
+*.pdf
+*.png
+*.jpg
+*.jpeg
