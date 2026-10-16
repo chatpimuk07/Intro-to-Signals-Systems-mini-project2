@@ -15,11 +15,22 @@ The project demonstrates real-time audio sampling, double-buffering, high-throug
 │   │   └── task1_esp32_audio.ino           # ESP32 firmware (Timer ISR + FreeRTOS + ADC)
 │   └── matlab/
 │       └── untitled.m                      # MATLAB script for real-time oscilloscope & FFT
-└── task2/                                  # Task 2: Digital I2S Microphone (INMP441)
-    ├── esp32_digital_microphone/
-    │   └── esp32_digital_microphone.ino    # ESP32 firmware (I2S DMA RX stream)
-    └── matlab/
-        └── matlab.m                        # MATLAB real-time GUI (Waveform, FFT, Spectrogram)
+├── task2/                                  # Task 2: Digital I2S Microphone (INMP441)
+│   ├── esp32_digital_microphone/
+│   │   └── esp32_digital_microphone.ino    # ESP32 firmware (I2S DMA RX stream)
+│   └── matlab/
+│       └── matlab.m                        # MATLAB real-time GUI (Waveform, FFT, Spectrogram)
+└── task3/                                  # Task 3: MAX 10 FPGA ADC Audio Sampling + ESP32 Bridge
+    ├── fpga/                               # DE10-Lite FPGA Design (Verilog HDL + QSF)
+    │   ├── rtl/                            # Top-level, 16 kHz sample rate generator, BRAM, SPI
+    │   ├── testbench/                      # ModelSim / Icarus Verilog testbench
+    │   └── de10_lite_pin_assignments.qsf   # Quartus pin assignments
+    ├── esp32_fpga_receiver/
+    │   └── esp32_fpga_receiver.ino         # ESP32 SPI Master to USB-Serial (2 Mbaud)
+    ├── matlab/
+    │   └── task3_visualization.m           # MATLAB real-time GUI (Waveform, FFT, Spectrogram)
+    └── python_gui/
+        └── task3_advanced_dsp_app.py       # Advanced Mini-Project Workstation (Tuner, Timbre, Events)
 ```
 
 ---
@@ -84,6 +95,23 @@ Data packets are streamed over USB-Serial at **2,000,000 baud (2 Mbaud)**:
 
 ---
 
+## Task 3: Audio Sampling using MAX 10 FPGA ADC & Analog Microphone
+
+### Overview
+- **Target Hardware:** Terasic DE10-Lite FPGA (`10M50DAF484C7G`) + ESP32 Bridge.
+- **Sampling Frequency ($F_s$):** $16\text{ kS/s}$ ($16,000\text{ Hz}$).
+- **Block Size ($N$):** $1024$ samples ($64.0\text{ ms}$ per block).
+- **FPGA Architecture:**
+  - Jitter-free hardware sampling strobe generated directly from 50 MHz crystal clock ($50\text{ MHz} / 16\text{ kHz} = 3125\text{ ticks}$).
+  - Hardware timing verification pin (`PIN_AB17` / Arduino IO8) toggling at $8.0\text{ kHz}$ for oscilloscope probe verification.
+  - Dual-bank Ping-Pong Block RAM ($2 \times 1024 \times 16\text{-bit}$, M9K BRAMs) isolating ADC sampling from readout.
+  - High-speed SPI Slave streaming blocks to ESP32 Master at $10\text{ MHz}$.
+- **Host Applications:**
+  - MATLAB GUI: Real-time Time-Domain, Hann-windowed FFT spectrum, and Spectrogram.
+  - Python Advanced DSP Workstation: High-precision musical pitch tuner (HPS/Autocorrelation with cents deviation), acoustic feature extraction (RMS, ZCR, spectral centroid, SNR, THD), and smart event classifier (claps, whistles, speech).
+
+---
+
 ## Getting Started
 
 ### 1. Arduino IDE Setup
@@ -93,13 +121,20 @@ Data packets are streamed over USB-Serial at **2,000,000 baud (2 Mbaud)**:
 4. Open and flash:
    - Task 1: `task1/task1_esp32_audio/task1_esp32_audio.ino`
    - Task 2: `task2/esp32_digital_microphone/esp32_digital_microphone.ino`
+   - Task 3: `task3/esp32_fpga_receiver/esp32_fpga_receiver.ino`
 
-### 2. MATLAB Setup & Execution
-1. Open MATLAB (R2020a or later recommended).
-2. Ensure you have the **MATLAB Support Package for Arduino / Instrument Control Toolbox** (standard `serialport` function).
-3. Connect the ESP32 to your computer via USB.
-4. Open the respective MATLAB script:
-   - For Task 1: `task1/matlab/untitled.m`
-   - For Task 2: `task2/matlab/matlab.m`
-5. Update `portName` / `serialPortName` to match your local serial port (e.g., `/dev/cu.usbserial-...` on macOS or `COMx` on Windows).
-6. Run the script. A real-time figure window will display the streaming waveforms and frequency spectrum.
+### 2. Quartus Prime Setup (Task 3 FPGA)
+1. Open Quartus Prime and load project with top module `de10_lite_audio_top.v`.
+2. Apply `task3/fpga/de10_lite_pin_assignments.qsf`.
+3. Compile and program the DE10-Lite via USB-Blaster.
+
+### 3. MATLAB & Python Setup & Execution
+1. For MATLAB:
+   - Task 1: `task1/matlab/untitled.m`
+   - Task 2: `task2/matlab/matlab.m`
+   - Task 3: `task3/matlab/task3_visualization.m`
+2. For Python Advanced DSP Workstation (Task 3 Mini-Project):
+   ```bash
+   .venv/bin/python task3/python_gui/task3_advanced_dsp_app.py
+   ```
+

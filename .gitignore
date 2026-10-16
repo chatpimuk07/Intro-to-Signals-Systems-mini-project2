@@ -1,4 +1,7 @@
 .venv/
+venv/
+*/venv/
+*/*/venv/
 __pycache__/
 *.pyc
 .DS_Store
@@ -10,3 +13,12 @@ task2_capture_*.png
 *.png
 *.jpg
 *.jpeg
+
+# Picture folders
+pic/
+**/pic/
+
+# Simulation / Build artifacts
+work_sim/
+**/work_sim/
+**/.DS_Store
