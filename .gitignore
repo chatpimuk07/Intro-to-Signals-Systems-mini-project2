@@ -22,3 +22,10 @@ pic/
 work_sim/
 **/work_sim/
 **/.DS_Store
+
+# FPGA project files & scripts (keep only VHDL)
+*.qpf
+*.qsf
+*.sdc
+task3/fpga/quartus/
+task3/fpga/sim/run_sim.sh
